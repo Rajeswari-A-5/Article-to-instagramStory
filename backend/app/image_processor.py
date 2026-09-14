@@ -13,7 +13,10 @@ def download_image(url: str) -> Image.Image:
     }
     response = requests.get(clean_url, headers=headers, timeout=10)
     response.raise_for_status()
-    return Image.open(BytesIO(response.content)).convert("RGB")
+    img = Image.open(BytesIO(response.content)).convert("RGB")
+    if img.width < 100 or img.height < 100:
+        raise ValueError(f"Image too small: {img.width}x{img.height}")
+    return img
 
 def crop_to_aspect_ratio(image: Image.Image, aspect_ratio: float = 9/16) -> Image.Image:
     """
@@ -56,10 +59,10 @@ def create_story_image(image_url: str, text: str, output_path: str):
     
     draw = ImageDraw.Draw(img)
     
-    # Fallback font
+    # Use robust custom font
     try:
-        # Windows typically has arial or calibri.
-        font = ImageFont.truetype("arial.ttf", 60)
+        font_path = os.path.join(os.path.dirname(__file__), "Roboto-Regular.ttf")
+        font = ImageFont.truetype(font_path, 60)
     except IOError:
         font = ImageFont.load_default()
         

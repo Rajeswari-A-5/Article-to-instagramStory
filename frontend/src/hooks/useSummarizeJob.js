@@ -28,7 +28,14 @@ export function useSummarizeJob() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to start summarization job');
+        let errorDetails = '';
+        try {
+          const errData = await response.json();
+          errorDetails = errData.detail || response.statusText;
+        } catch {
+          errorDetails = response.statusText;
+        }
+        throw new Error(`Failed to start job (${response.status}): ${errorDetails}`);
       }
 
       const data = await response.json();
