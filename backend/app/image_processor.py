@@ -14,7 +14,7 @@ def download_image(url: str) -> Image.Image:
     response = requests.get(clean_url, headers=headers, timeout=10)
     response.raise_for_status()
     img = Image.open(BytesIO(response.content)).convert("RGB")
-    if img.width < 100 or img.height < 100:
+    if img.width < 50 or img.height < 50:
         raise ValueError(f"Image too small: {img.width}x{img.height}")
     return img
 
@@ -60,10 +60,13 @@ def create_story_image(image_url: str, text: str, output_path: str):
     draw = ImageDraw.Draw(img)
     
     # Use robust custom font
+    # Use robust custom font
     try:
-        font_path = os.path.join(os.path.dirname(__file__), "Roboto-Regular.ttf")
+        current_dir = os.path.abspath(os.path.dirname(__file__))
+        font_path = os.path.join(current_dir, "Roboto-Regular.ttf")
         font = ImageFont.truetype(font_path, 60)
-    except IOError:
+    except IOError as e:
+        print(f"Failed to load font at {font_path}: {e}")
         font = ImageFont.load_default()
         
     # Wrap text
